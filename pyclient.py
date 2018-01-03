@@ -2,7 +2,6 @@
 import urllib3
 urllib3.disable_warnings()
 import filr
-
 import os
 import sys
 import json
@@ -22,7 +21,7 @@ import ping
 import argparse
 from dateutil import parser
 
-CMD=["folderid","lsnf","syncstat","sync","unshdir","shdir","share","rmdir","mkdir","dir","up","cd","size","view","rights","shares","about","who","ldir","script","userid","savenf","loadnf"]
+CMD=["folderid","lsnf","syncstat","sync","unshdir","shdir","share","rmdir","mkdir","dir","up","cd","size","view","rights","shares","about","who","ldir","script","syncldap","loadldap","saveldap","userid","savenf","loadnf"]
 
 def chgpath(path):
 	#print path[0]
@@ -93,7 +92,7 @@ class _GetchWindows:
         							
     
 def shared(server,userid,user,pword,s="",parent=1):
-	print s
+	#print s
 	"""(REST) Routine to look at shared with Me Folder"""
 	start_time=time.time()
 	global nf
@@ -648,10 +647,64 @@ while tp==1:
 			else:
 				print "Error in File Download"
 				print
+		#else:
+			#print "Error in Command"
+	
+	
+	if cmd=="syncldap":
+		print
+		print "Ldap Sync "
+		print "=========="
+		if comp<>"Windows":
+			try:
+				cmds=shlex.split(cmd)
+			except ValueError:
+				print "Missing quote"
+				cmds=""
 		else:
-			print "Error in Command"
-	
-	
+			cmds=cmd.split()
+			
+		if len(cmds)==1:
+			filr.ldapsync(srv,s)
+		else:
+			out("Error In Command\n")
+			
+	if cmd[0:8]=="saveldap":
+		print
+		print "Save LDAP Config to Named File "
+		print "==============================="
+		if comp<>"Windows":
+			try:
+				cmds=shlex.split(cmd)
+			except ValueError:
+				print "Missing quote"
+				cmds=""
+		else:
+			cmds=cmd.split()
+		if len(cmds)==2:
+			filename=cmds[1]
+			print filename+" saved"
+			print
+			temp=filr.lsldap(srv,filename,s)
+		
+	if cmd[0:8]=="loadldap":
+		print
+		print "Restore LDAP Config from named file "
+		print "===================================="
+		if comp<>"Windows":
+			try:
+				cmds=shlex.split(cmd)
+			except ValueError:
+				print "Missing quote"
+				cmds=""
+		else:
+			cmds=cmd.split()
+		if len(cmds)==3:
+			filename=cmds[1]
+			pw=cmds[2]
+			#print filename,pw
+			temp=filr.loadldap(srv,filename,pw,s)
+			
 	if cmd[0:6]=="loadnf":
 		print
 		print "Restore NF and NF Server Selected"
@@ -666,23 +719,27 @@ while tp==1:
 			cmds=cmd.split()
 			
 		if len(cmds)==3:
+			print cmds
 			print
 			path=filr.raw(cmds[1])
 			proxy_user_pw=cmds[2]
-			nf=path+"-nf"
-			nfs=path+"-nfs"
+			nf=path+"-nf.xml"
+			nfs=path+"-nfs.xml"
 			print "Restoring two files: "
 			print nf
 			print nfs
 			print "\n"
 			print "One holds the Netfolders and one the Netfolder Servers"
 			print "\n"
-			temp=filr.restnfs(srv,nf,proxy_user_pw,user,s)
-			temp=filr.restnf(srv,nfs,s)
+			temp=filr.restnfs(srv,nfs,proxy_user_pw,user,s)
+			if temp==0:
+				temp=filr.restnf(srv,nf,user,s)
+			else:
+				print "Error in restoring Netfolder Servers"
 			print
 		else:
 			print
-			print "ERROR: Command Missing path"
+			print "ERROR: Command Missing parameter"
 			print
 	
 	
@@ -779,7 +836,7 @@ while tp==1:
 			print " ========================="
 			print "By David Shepherd"
 			print "Novell Consulting"
-			print "14th January 2013"
+			print "3rd January 2018"
 			print "fixes:"
 			print "0.71:\ttab complete, improved username handling"
 			print "0.90:\tUpload fixed, partial support of shared with me"
@@ -787,6 +844,7 @@ while tp==1:
 			print "0.95:\tBasic script handling"
 			print "0.97:\tTested on the Raspberry PI"
 			print "0.98:\tSharing of folders and nf sync added"
+			print "1.00:\tLdap imp/exp, nf /imp/exp and ldapsync"
 		print
 		
 	if cmd[0:4]=="size":
@@ -944,7 +1002,7 @@ while tp==1:
 			print "syncstat foldername"
 					
 					
-	if cmd[0:4]=="sync":
+	if cmd[0:5]=="sync ":
 		cmds=shlex.split(cmd)
 		if len(cmds)==2:
 			for temp in resp:
@@ -1021,8 +1079,6 @@ while tp==1:
 		print 
 		print "Help Selected"
 		print "============="
-		print "The following commands are supported:"
-		print
 		print "dir\t\tDirectory Listing"
 		print "cd folder	Change directory to new folder"
 		print "cd ..\t\tChange directory to parent"
@@ -1048,6 +1104,8 @@ while tp==1:
 		print "folderid \tFolderid of current folder"
 		print "fileid filename\tFile id of selected file"
 		print "savenf path\\filename\t saves nf and nfs to files"
+		print "loadnf path\\filename\t loads xml file to create nf and nfs"
+		
 		print "quit\t\tEnds program"
 		print
 	
@@ -1098,6 +1156,15 @@ while tp==1:
 				out("ERROR: File Name Not Found")
 		out("\n")
 		
+	if cmd[0:4]=="zone":
+		
+		#cmds=cmd.split(" ")
+		cmds=shlex.split(cmd)
+		#print len(cmds)
+		if len(cmds)>1:
+			if cmds[1].lower()=="list":
+				temp=filr.zone(srv,"list",user,pw,s)
+				print "list ..."
 		
 	
 	
