@@ -11,7 +11,7 @@ dicttoxml==1.7.4
 dis3==0.1.1
 enum34==1.1.6
 future==0.16.0
-httplib2==0.10.3
+httplib2==0.18.0
 idna==2.6
 ipaddress==1.0.18
 keyring==10.5.0
