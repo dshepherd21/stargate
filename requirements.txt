@@ -6,7 +6,7 @@ bs4==0.0.1
 certifi==2017.11.5
 cffi==1.11.2
 chardet==3.0.4
-cryptography==2.1.4
+cryptography==3.2
 dicttoxml==1.7.4
 dis3==0.1.1
 enum34==1.1.6
