@@ -15,7 +15,7 @@ httplib2==0.10.3
 idna==2.6
 ipaddress==1.0.18
 keyring==10.5.0
-lxml==4.1.1
+lxml==4.6.5
 macholib==1.9
 MySQL-python==1.2.5
 paramiko==2.4.0
